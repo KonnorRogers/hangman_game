@@ -1,61 +1,88 @@
-# 7 guesses
-#  |
-#  0
-# /|\
-# / \
+require_relative 'display_status.rb'
+require 'yaml'
 
-# hangman game
+# Hangman game designed for TheOdinProject
 class Hangman
-  attr_reader :num_incorrect_guesses, :secret_word, :guesses
+  attr_reader :num_incorrect_guesses, :secret_word, :guesses, :display_word
 
   MAX_INCORRECT_GUESSES = 7
-  SAFE_WORDS = %w[quit save].freeze
+  SAFE_WORDS = %w[quit save load].freeze
 
   def initialize
+    @display_status = DisplayStatus.new(self)
     @guesses = []
     @num_incorrect_guesses = 0
     @secret_word = select_random_word
-    @display_word = Array.new(@secret_word.length, '_')
+    @display_word = reset_display_word
   end
 
   def play_game
     loop do
-      display_information
+      break if game_over
+
+      @display_status.display_information
 
       input = user_input
-      break if input == 'quit'
+      return if input == 'quit'
       @guesses << input
       check_guess(input)
     end
 
-    puts 'Goodbye!'
+    restart_game
   end
 
-  def display_information
-    system 'clear'
-    puts 'Welcome to Hangman!!'
-    puts 'Valid commands are quit and save.'
-    p display_word
-    puts 'Previous guesses:'
-    p @guesses
-  end
-
-  def display_word
-    @display_word.join(' ')
+  def incorrect_guesses_left
+    MAX_INCORRECT_GUESSES - @num_incorrect_guesses
   end
 
   private
 
-  def player_won
-    if @display_word.include?('_')
-      puts 'You have won! Congratulations!'
-      true
+  def restart_game
+    puts 'Would you like to play again? (Y/N)'
+
+    loop do
+      input = gets.chomp.downcase
+
+      return if input == 'n'
+      break if input == 'y'
+
+      puts 'Improper input, please enter Y to restart or N to end the program!'
     end
+
+    Hangman.new.play_game
+  end
+
+  def save_game
+  end
+
+  def load_game
+  end
+
+  def reset_display_word
+    @display_word = Array.new(@secret_word.length, '_')
+  end
+
+  def player_lost
+    return false if incorrect_guesses_left > 0
+
+    system 'clear'
+    puts 'You have guessed incorrectly too many times. You have lost.'
+    puts "The word was '#{@secret_word}'"
+    true
+  end
+
+  def player_won
+    return false if @display_word.include?('_')
+
+    system 'clear'
+    puts 'CONGRATULATIONS YOU HAVE WON!'
+    puts "The word was #{@secret_word}"
+    true
   end
 
   def game_over
     return true if player_won
-    return true if @num_incorrect_guesses > MAX_INCORRECT_GUESSES
+    return true if player_lost
   end
 
   # loads words into an array, selects only words of a certain length
@@ -64,10 +91,6 @@ class Hangman
     words = File.readlines('5desk.txt', chomp: true) { |word| word }
     words.select! { |word| word.length > 5 && word.length < 12 }
     words.sample.downcase
-  end
-
-  def display_guesses
-    @guesses.each { |guess| print "#{guess} " }
   end
 
   def check_input(input)
@@ -80,34 +103,42 @@ class Hangman
   end
 
   def user_input
-    puts 'Enter your guess:'
+    puts "\nEnter your guess:"
     input = ''
 
     loop do
       input = gets.chomp.downcase
       break if check_input(input)
-      puts 'Improper input, please enter a letter.'
+      @display_status.display_information
+
+      incorrect_input(input)
     end
 
     input
   end
 
+  def incorrect_input(input)
+    if @guesses.include?(input)
+      puts "'#{input}' was already guessed. Please enter a different letter."
+    else
+      puts 'Improper input, please enter a letter.'
+    end
+  end
+
   def check_guess(guess)
-    # return false unless @secret_word.include?(guess)
     unless @secret_word.include?(guess)
       @num_incorrect_guesses += 1
+      @display_status.update_hangman
       return false
     end
 
-    letter_indexes = []
     secret_word = @secret_word.split('')
+
     secret_word.each_with_index do |item, index|
       next unless item == guess
-      letter_indexes << index
+      @display_word[index] = guess
     end
-
-    letter_indexes.each { |index| @display_word[index] = guess }
   end
 end
 
-puts Hangman.new.play_game
+Hangman.new.play_game
