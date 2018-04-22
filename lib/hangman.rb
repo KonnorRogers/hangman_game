@@ -1,5 +1,5 @@
 require_relative 'display_status.rb'
-require 'yaml'
+require_relative 'file_managing.rb'
 
 # Hangman game designed for TheOdinProject
 class Hangman
@@ -9,6 +9,7 @@ class Hangman
   SAFE_WORDS = %w[quit save load].freeze
 
   def initialize
+    @file_management = FileManaging.new
     @display_status = DisplayStatus.new(self)
     @guesses = []
     @num_incorrect_guesses = 0
@@ -24,6 +25,16 @@ class Hangman
 
       input = user_input
       return if input == 'quit'
+
+      if input == 'load'
+        @file_management.load_game
+        break
+      end
+
+      if input == 'save'
+        @file_management.save_game(self)
+        return
+      end
       @guesses << input
       check_guess(input)
     end
@@ -38,7 +49,7 @@ class Hangman
   private
 
   def restart_game
-    puts 'Would you like to play again? (Y/N)'
+    puts "\nWould you like to play again? (Y/N)"
 
     loop do
       input = gets.chomp.downcase
@@ -52,12 +63,6 @@ class Hangman
     Hangman.new.play_game
   end
 
-  def save_game
-  end
-
-  def load_game
-  end
-
   def reset_display_word
     @display_word = Array.new(@secret_word.length, '_')
   end
@@ -66,8 +71,11 @@ class Hangman
     return false if incorrect_guesses_left > 0
 
     system 'clear'
+
+    puts @display_status.draw_hangman
+
     puts 'You have guessed incorrectly too many times. You have lost.'
-    puts "The word was '#{@secret_word}'"
+    puts "\nThe word was '#{@secret_word}'"
     true
   end
 
@@ -128,7 +136,6 @@ class Hangman
   def check_guess(guess)
     unless @secret_word.include?(guess)
       @num_incorrect_guesses += 1
-      @display_status.update_hangman
       return false
     end
 

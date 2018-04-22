@@ -2,10 +2,10 @@ require_relative 'scaffolding.rb'
 
 # Used to display info for hangman
 class DisplayStatus
+  SCAFFOLDING = Scaffolding::SCAFFOLDING
+
   def initialize(hangman)
-    @scaffolding = Scaffolding.new
     @hangman = hangman
-    @scaffold = ['-----------------------']
   end
 
   def display_information
@@ -39,10 +39,6 @@ class DisplayStatus
   end
 
   def draw_hangman
-    @scaffold.each { |scaffold| print scaffold }
-  end
-
-  def update_hangman
-    @scaffold << SCAFFOLDING[@hangman.num_incorrect_guesses]
+    print SCAFFOLDING[@hangman.num_incorrect_guesses]
   end
 end
