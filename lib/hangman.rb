@@ -20,16 +20,13 @@ class Hangman
   def play_game
     loop do
       break if game_over
-
+      # instance_variables_hash
       @display_status.display_information
 
       input = user_input
       return if input == 'quit'
 
-      if input == 'load'
-        @file_management.load_game
-        break
-      end
+      @file_management.load_game.play_game if input == 'load'
 
       if input == 'save'
         @file_management.save_game(self)
@@ -53,7 +50,6 @@ class Hangman
 
     loop do
       input = gets.chomp.downcase
-
       return if input == 'n'
       break if input == 'y'
 
