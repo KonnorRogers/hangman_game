@@ -3,19 +3,20 @@ file_management: !ruby/object:FileManaging {}
 display_status: !ruby/object:DisplayStatus
   hangman: *1
 guesses:
-- e
-- f
-- g
-num_incorrect_guesses: 2
-secret_word: activeness
+- a
+- b
+- c
+- d
+num_incorrect_guesses: 3
+secret_word: roundhouse
 display_word:
 - _
 - _
 - _
 - _
+- d
 - _
-- e
 - _
-- e
+- _
 - _
 - _

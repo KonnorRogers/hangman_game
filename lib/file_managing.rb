@@ -10,7 +10,6 @@ class FileManaging
   end
 
   def load_game
-    save_file = File.open('saved_game/save_file.yaml', 'r')
-    YAML.load(save_file)
+    YAML.load_file('saved_game/save_file.yaml')
   end
 end
