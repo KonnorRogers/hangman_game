@@ -15,3 +15,7 @@
   * Game created and tested with Ruby 2.4.1.
   * Game also intended to be run from a unix command line.
 
+## Screenshots
+
+![Terminal screenshot of Hangman](hangman.png)
+
